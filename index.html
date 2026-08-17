@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LucaToji — Minecraft Thumbnail Designer</title>
+<meta name="description" content="Professional Minecraft thumbnails that stop the scroll. Fast turnaround, 5 revisions, starting at €10.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0f0a;
+    --bg-2:#10160e;
+    --card:#141b12;
+    --card-2:#1a2317;
+    --line:rgba(166,255,94,.14);
+    --text:#e9f2e2;
+    --muted:#9fb095;
+    --accent:#a9f33c;
+    --accent-2:#7fd61f;
+    --radius:18px;
+    --shadow:0 20px 60px rgba(0,0,0,.45);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;letter-spacing:-.02em}
+  ::selection{background:var(--accent);color:#0b0f0a}
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+
+  .wrap{max-width:1240px;margin:0 auto;padding:0 28px}
+
+  /* subtle grid + glow backdrop */
+  .bg-decor{position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(169,243,60,.10), transparent 60%),
+      radial-gradient(700px 500px at -10% 30%, rgba(127,214,31,.06), transparent 60%);
+  }
+  .bg-decor::after{content:"";position:absolute;inset:0;
+    background-image:linear-gradient(rgba(169,243,60,.035) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(169,243,60,.035) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  }
+
+  /* ---------- Nav ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(11,15,10,.82);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:70px}
+  .logo{display:flex;align-items:center;gap:12px;font-family:'Space Grotesk';font-weight:700;font-size:1.15rem}
+  .logo img{height:40px;width:auto}
+  .logo .tag{color:var(--muted);font-weight:500;font-size:.82rem;line-height:1.1}
+  .logo .tag b{color:var(--accent)}
+  nav.links{display:flex;gap:30px;align-items:center}
+  nav.links a{font-size:.92rem;color:var(--muted);transition:color .2s}
+  nav.links a:hover{color:var(--accent)}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--accent);color:#0b0f0a;
+    font-family:'Space Grotesk';font-weight:700;font-size:.92rem;
+    padding:11px 20px;border-radius:12px;border:none;cursor:pointer;
+    transition:transform .15s, box-shadow .2s, background .2s;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(169,243,60,.35);background:var(--accent-2)}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .btn.ghost:hover{background:var(--card-2);box-shadow:none}
+  .burger{display:none;background:none;border:1px solid var(--line);border-radius:10px;color:var(--text);width:42px;height:42px;cursor:pointer;align-items:center;justify-content:center}
+  .burger svg{width:22px;height:22px}
+  .burger .ic-close{display:none}
+  .burger.open .ic-close{display:block}
+  .burger.open .ic-open{display:none}
+  .mobile-links{display:none;flex-direction:column;gap:4px;padding:12px 0 20px}
+  .mobile-links a{padding:11px 12px;border-radius:10px;color:var(--muted)}
+  .mobile-links a:hover{background:var(--card-2);color:var(--accent)}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:88px 0 64px;display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:.8rem;font-weight:600;color:var(--accent);
+    border:1px solid var(--line);background:rgba(169,243,60,.07);
+    padding:7px 14px;border-radius:999px;margin-bottom:22px;
+  }
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(169,243,60,.5);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(169,243,60,.5)}70%{box-shadow:0 0 0 8px rgba(169,243,60,0)}100%{box-shadow:0 0 0 0 rgba(169,243,60,0)}}
+  .hero h1{font-size:clamp(2.4rem,5vw,4rem);line-height:1.05;font-weight:700}
+  .hero h1 .accent{color:var(--accent)}
+  .hero p.lead{margin:22px 0 30px;color:var(--muted);font-size:1.08rem;max-width:520px}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap}
+  .mini-stats{display:flex;gap:34px;margin-top:44px;flex-wrap:wrap}
+  .mini-stat b{display:block;font-family:'Space Grotesk';font-size:1.7rem;color:var(--text)}
+  .mini-stat span{font-size:.82rem;color:var(--muted)}
+
+  /* featured slideshow card */
+  .featured{position:relative;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);transform:rotate(1.5deg)}
+  .slides{position:relative;aspect-ratio:16/9;background:linear-gradient(180deg,#1d3a12 0%,#2f5c1c 45%,#4b8a2a 100%);display:flex;align-items:center;justify-content:center}
+  .slide{position:absolute;inset:0;opacity:0;transition:opacity .9s ease;z-index:1}
+  .slide.active{opacity:1}
+  .slide img{width:100%;height:100%;object-fit:cover}
+  .featured .cap{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:26px 18px 16px;background:linear-gradient(transparent,rgba(0,0,0,.85));font-family:'Space Grotesk';font-weight:600;font-size:1.05rem;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+  .dots{position:absolute;right:16px;bottom:16px;z-index:3;display:flex;gap:6px;align-items:center}
+  .dots button{width:7px;height:7px;border-radius:99px;border:none;background:rgba(255,255,255,.45);cursor:pointer;padding:0;transition:all .3s}
+  .dots button.active{width:22px;background:var(--accent)}
+
+  /* ---------- Sections ---------- */
+  section{padding:200px 0}
+  .sec-head{margin-bottom:84px;max-width:680px}
+  .sec-head .kicker{color:var(--accent);font-weight:700;font-size:1.05rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+  .sec-head h2{font-size:clamp(2.2rem,4vw,3.3rem);line-height:1.1}
+  .sec-head p{color:var(--muted);margin-top:16px;font-size:1.05rem}
+
+  /* stats band */
+  .stats{
+    border:1px solid var(--line);border-radius:var(--radius);
+    background:linear-gradient(180deg,var(--card),var(--bg-2));
+    display:grid;grid-template-columns:repeat(4,1fr);
+  }
+  .stat{padding:30px 24px;text-align:center}
+  .stat + .stat{border-left:1px solid var(--line)}
+  .stat b{font-family:'Space Grotesk';font-size:2.3rem;color:var(--accent)}
+  .stat span{display:block;color:var(--muted);font-size:.88rem;margin-top:4px}
+
+  /* work grid */
+  .work-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:30px}
+  .thumb{
+    position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+    aspect-ratio:16/9;cursor:pointer;transition:transform .25s, box-shadow .25s;
+  }
+  .thumb:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,.5)}
+  .thumb .art{position:absolute;inset:0;transition:transform .4s}
+  .thumb .thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}
+  .thumb:hover .art,.thumb:hover .thumb-img{transform:scale(1.07)}
+  .thumb .title{
+    position:absolute;left:0;right:0;bottom:0;padding:40px 20px 18px;
+    background:linear-gradient(transparent,rgba(0,0,0,.9));
+    font-family:'Space Grotesk';font-weight:600;font-size:1.18rem;line-height:1.3;
+    opacity:0;transform:translateY(14px);
+    transition:opacity .35s ease, transform .35s ease, text-shadow .35s ease;
+  }
+  .thumb:hover .title{opacity:1;transform:translateY(0) scale(1.05);text-shadow:0 0 22px rgba(169,243,60,.9),0 0 48px rgba(169,243,60,.4)}
+
+  /* trusted by */
+  .trusted-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+  .creator{
+    display:flex;align-items:center;gap:14px;padding:20px 18px;border-radius:16px;
+    border:1px solid var(--line);background:var(--card);transition:border-color .2s, transform .2s;
+  }
+  .creator:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .avatar{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:1.15rem;color:#0b0f0a;flex-shrink:0;overflow:hidden}
+  .avatar img{width:100%;height:100%;object-fit:cover}
+  .creator b{font-size:.98rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .creator span{font-size:.8rem;color:var(--muted)}
+  .hidden{display:none}
+  .show-more-wrap{text-align:center;margin-top:26px}
+
+  /* pricing */
+  .price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .price-card{
+    border:1px solid var(--line);border-radius:var(--radius);background:var(--card);
+    padding:38px 32px;transition:border-color .2s, transform .2s;
+  }
+  .price-card:hover{border-color:var(--accent);transform:translateY(-5px)}
+  .price-card .icon{color:var(--accent);margin-bottom:14px;display:flex}
+  .price-card .icon svg{width:30px;height:30px}
+  .price-card h3{font-size:1.18rem;margin-bottom:12px}
+  .price-card p{color:var(--muted);font-size:.95rem}
+  .price-card .big{font-family:'Space Grotesk';font-size:1.9rem;color:var(--accent);font-weight:700}
+  .price-card .big small{font-size:.85rem;color:var(--muted);font-weight:500}
+  .price-card ul{list-style:none;margin-top:14px;display:flex;flex-wrap:wrap;gap:10px}
+  .price-card li{font-size:.95rem;font-weight:600;background:var(--card-2);border:1px solid var(--line);padding:8px 16px;border-radius:999px;color:var(--text)}
+
+  /* process */
+  .process{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:step}
+  .step{
+    position:relative;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);
+    padding:40px 32px 34px;
+  }
+  .step::before{
+    counter-increment:step;content:"0" counter(step);
+    font-family:'Space Grotesk';font-weight:700;font-size:2.4rem;color:transparent;
+    -webkit-text-stroke:1.5px var(--accent);display:block;margin-bottom:14px;
+  }
+  .step h3{font-size:1.18rem;margin-bottom:10px}
+  .step p{color:var(--muted);font-size:.95rem}
+  .step .num{position:absolute;top:22px;right:22px;font-family:'Space Grotesk';font-weight:700;color:rgba(169,243,60,.18);font-size:1.5rem}
+
+  /* contact */
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .contact-card{
+    border:1px solid var(--line);border-radius:var(--radius);background:var(--card);
+    padding:42px 36px;display:flex;flex-direction:column;gap:6px;transition:border-color .2s, transform .2s;
+  }
+  .contact-card:hover{border-color:var(--accent);transform:translateY(-4px)}
+  .contact-card .lbl{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
+  .contact-card .val{font-family:'Space Grotesk';font-size:1.55rem;font-weight:600;word-break:break-all}
+  #contact{padding-bottom:230px}
+  .contact-card .sub{color:var(--muted);font-size:.88rem}
+  .contact-card .copy{margin-top:12px;align-self:flex-start}
+
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:.88rem}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .foot .logo img{height:34px}
+  #topBtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;padding:9px 16px;font-size:.85rem;cursor:pointer;transition:border-color .2s,color .2s}
+  #topBtn svg{width:15px;height:15px}
+  #topBtn:hover svg{transform:translateY(-2px)}
+  #topBtn:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* custom cursor */
+  .cursor-dot,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;border-radius:50%;opacity:0}
+  .cursor-dot{width:8px;height:8px;background:var(--accent);transform:translate(-50%,-50%);box-shadow:0 0 12px rgba(169,243,60,.9)}
+  .cursor-ring{width:36px;height:36px;border:2px solid rgba(169,243,60,.65);transform:translate(-50%,-50%);transition:width .22s ease,height .22s ease,border-color .22s ease,background .22s ease,box-shadow .22s ease}
+  .cursor-ring.hover{width:64px;height:64px;border-color:var(--accent);background:rgba(169,243,60,.08);box-shadow:0 0 26px rgba(169,243,60,.28)}
+  .cursor-ring.press{width:26px;height:26px;border-color:var(--accent-2)}
+  body.custom-cursor,body.custom-cursor *{cursor:none!important}
+
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease, transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ---------- Responsive ---------- */
+  @media(max-width:980px){
+    .hero{grid-template-columns:1fr;gap:40px;padding-top:56px}
+    .featured{max-width:560px;transform:none}
+    .work-grid{grid-template-columns:repeat(2,1fr)}
+    .trusted-grid{grid-template-columns:repeat(3,1fr)}
+    .price-grid{grid-template-columns:repeat(2,1fr)}
+    .process{grid-template-columns:1fr}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .stat:nth-child(3){border-left:none}
+    .stat:nth-child(n+3){border-top:1px solid var(--line)}
+    .contact-grid{grid-template-columns:1fr}
+  }
+  @media(max-width:720px){
+    nav.links{display:none}
+    .burger{display:block}
+    .mobile-links.open{display:flex}
+    .work-grid{grid-template-columns:1fr}
+    .trusted-grid{grid-template-columns:repeat(2,1fr)}
+    .price-grid{grid-template-columns:1fr}
+    .mini-stats{gap:22px}
+  }
+</style>
+</head>
+<body>
+<div class="cursor-dot"></div>
+<div class="cursor-ring"></div>
+<div class="bg-decor"></div>
+
+<!-- ============ NAV ============ -->
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#top">
+      <img src="https://i.imgur.com/EAvhEOp.png" alt="LucaToji logo">
+      <span class="tag">LucaToji<br><b>Thumbnail Designer</b></span>
+    </a>
+    <nav class="links">
+      <a href="#work">Work</a>
+      <a href="#creators">Creators</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#process">Process</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a class="btn" href="#contact">Contact me</a>
+    <button class="burger" id="burger" aria-label="Menu">
+      <svg class="ic-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg class="ic-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="wrap mobile-links" id="mobileLinks">
+    <a href="#work">Work</a>
+    <a href="#creators">Creators</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#process">Process</a>
+    <a href="#contact">Contact</a>
+  </div>
+</header>
+
+<main id="top">
+  <!-- ============ HERO ============ -->
+  <section class="wrap hero">
+    <div class="reveal">
+      <span class="eyebrow"><span class="dot"></span> Commissions open</span>
+      <h1>Thumbnails that<br>stop the <span class="accent">scroll.</span></h1>
+      <p class="lead">I craft bold, cinematic Minecraft thumbnails built to win clicks. Quick turnaround, pixel-perfect detail, and a designer who actually cares about your channel.</p>
+      <div class="hero-cta">
+        <a class="btn" href="#work">See my work</a>
+        <a class="btn ghost" href="#contact">Message me</a>
+      </div>
+      <div class="mini-stats">
+        <div class="mini-stat"><b>100+</b><span>Thumbnails made</span></div>
+        <div class="mini-stat"><b>10+</b><span>Creators worked with</span></div>
+        <div class="mini-stat"><b>1–7d</b><span>Delivery time</span></div>
+      </div>
+    </div>
+    <div class="featured reveal" id="featured">
+      <div class="slides" id="slides"></div>
+      <div class="cap" id="slideCap">Your next thumbnail here</div>
+      <div class="dots" id="slideDots"></div>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section class="wrap" style="padding-top:0">
+    <div class="stats reveal">
+      <div class="stat"><b>100+</b><span>Thumbnails Made</span></div>
+      <div class="stat"><b>10+</b><span>Creators Worked With</span></div>
+      <div class="stat"><b>5</b><span>Revisions Included</span></div>
+      <div class="stat"><b>1–7d</b><span>Average Delivery</span></div>
+    </div>
+  </section>
+
+  <!-- ============ WORK ============ -->
+  <section id="work" class="wrap">
+    <div class="sec-head reveal">
+      <br>
+      <br>
+      <div class="kicker">My Work</div>
+      <h2>Recent thumbnails</h2>
+      <p>A selection of recent commissions. Every thumbnail is built from your idea — no templates, no shortcuts.</p>
+    </div>
+    <div class="work-grid" id="workGrid">
+      <!-- 10 placeholder thumbnails injected by JS -->
+    </div>
+  </section>
+
+  <!-- ============ CREATORS / TRUSTED BY ============ -->
+  <section id="creators" class="wrap">
+    <div class="sec-head reveal">
+      <br>
+      <br>
+      <div class="kicker">Trusted By</div>
+      <h2>Creators I've worked with</h2>
+      <p>From small channels finding their style to established creators who need reliable, click-worthy art.</p>
+    </div>
+    <div class="trusted-grid" id="trustedGrid">
+      <!-- 5 visible + 5 expandable injected by JS -->
+    </div>
+    <div class="show-more-wrap reveal">
+      <button class="btn ghost" id="showCreators">Show all 10</button>
+    </div>
+  </section>
+
+  <!-- ============ PRICING ============ -->
+  <section id="pricing" class="wrap">
+    <div class="sec-head reveal">
+      <div class="kicker">Pricing</div>
+      <h2>Simple, fair, transparent</h2>
+      <p>You know exactly what you pay before we start. No surprises, ever.</p>
+    </div>
+    <div class="price-grid">
+      <div class="price-card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+        <h3>Price Range</h3>
+        <div class="big">€10–20 <small>/ thumbnail</small></div>
+        <p>Simpler thumbnails start at €10. Complex, detailed scenes go up to €20. Final price locked before we begin.</p>
+      </div>
+      <div class="price-card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h3>Turnaround</h3>
+        <div class="big">1–7 <small>days</small></div>
+        <p>Most thumbnails are delivered within a few days. Larger projects take up to one week — always on time.</p>
+      </div>
+      <div class="price-card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+        <h3>Revisions</h3>
+        <div class="big">5 <small>included</small></div>
+        <p>Five revisions are always included so we can fine-tune it until you're 100% happy with the result.</p>
+      </div>
+      <div class="price-card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+        <h3>Accepted Payments</h3>
+        <ul>
+          <li>Paysafe</li>
+          <li>Discord Nitro</li>
+        </ul>
+        <p style="margin-top:16px">Pay the way that suits you best. Payment details are shared once we agree on a project.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROCESS ============ -->
+  <section id="process" class="wrap">
+    <div class="sec-head reveal">
+      <br>
+      <br>
+      <div class="kicker">The Process</div>
+      <h2>How it works</h2>
+      <p>Three simple steps from your idea to a thumbnail that performs.</p>
+    </div>
+    <div class="process">
+      <div class="step reveal">
+        <span class="num">01</span>
+        <h3>Idea &amp; references</h3>
+        <p>You send the video title, concept, and any inspiration. We lock the direction before anything else starts.</p>
+      </div>
+      <div class="step reveal">
+        <span class="num">02</span>
+        <h3>Design &amp; build</h3>
+        <p>I design the scene, posing, lighting, and composition — then polish it with professional editing and effects.</p>
+      </div>
+      <div class="step reveal">
+        <span class="num">03</span>
+        <h3>Review &amp; deliver</h3>
+        <p>You get the final thumbnail with up to 5 revisions. Once you're happy, it's yours to upload.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section id="contact" class="wrap">
+    <div class="sec-head reveal">
+      <br>
+      <br>
+      <div class="kicker">Contact</div>
+      <h2>Let's make something great</h2>
+      <p>Have an idea? Reach out — I usually reply within hours.</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card reveal">
+        <span class="lbl">Discord</span>
+        <span class="val">lucatoji1</span>
+        <span class="sub">Fastest way to reach me — for commissions, questions, or just to say hi.</span>
+        <button class="btn ghost copy" data-copy="lucatoji1">Copy username</button>
+      </div>
+      <div class="contact-card reveal">
+        <span class="lbl">Business inquiries</span>
+        <span class="val">lucatojidesigns@gmail.com</span>
+        <span class="sub">For commissions, collaborations, and business questions.</span>
+        <button class="btn ghost copy" data-copy="lucatojidesigns@gmail.com">Copy email</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap foot">
+    <a class="logo" href="#top">
+      <img src="https://i.imgur.com/EAvhEOp.png" alt="LucaToji logo">
+      <span class="tag">LucaToji</span>
+    </a>
+    <span>© 2026 AfkChicken · Developer</span>
+    <button id="topBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg> Back to top</button>
+  </div>
+</footer>
+
+<script src="Trusted.json"></script>
+<script src="thumbs.json"></script>
+<script>
+  // ---------- Thumbnails (from imgs/ via thumbs.json) ----------
+  const DEFAULT_THUMBS = [
+    "Minecraft, But Everything Is TNT!.png",
+    "I Beat the Hardest Seed Ever....png",
+    "100 Days in a Cave-Only World.png",
+    "Minecraft Speedrun, But It's Random.png",
+    "We Survived 1,000 Days on a Skyblock.png",
+    "Minecraft But Deaths = World Size.png",
+    "Building the Ultimate Base in Survival.png",
+    "I Became a God in Minecraft.png",
+    "The Void Challenge (No Blocks Allowed).png",
+    "Minecraft UHC With My Subscribers!.png"
+  ];
+  const scenes = [
+    "linear-gradient(160deg,#3a1d5c,#7a2d8f 55%,#ffb347)",
+    "linear-gradient(160deg,#0e2f44,#1d6fa5 55%,#9ad7ff)",
+    "linear-gradient(160deg,#1d3a12,#2f5c1c 55%,#a9f33c)",
+    "linear-gradient(160deg,#3b1d12,#a53f1d 55%,#ffd34d)",
+    "linear-gradient(160deg,#12203a,#2c4a8f 55%,#8fd0ff)",
+    "linear-gradient(160deg,#2a1212,#8f1d1d 55%,#ff8f5a)",
+    "linear-gradient(160deg,#1c1c24,#3d3d55 55%,#9aa0c0)",
+    "linear-gradient(160deg,#0f2a1e,#1f7a52 55%,#aef7c9)",
+    "linear-gradient(160deg,#3a1a2f,#7a2d5c 55%,#ffb3d9)",
+    "linear-gradient(160deg,#202a12,#5c7a1d 55%,#e0ff8f)"
+  ];
+  const THUMBS = (window.THUMBNAILS && Array.isArray(window.THUMBNAILS) && window.THUMBNAILS.length)
+    ? window.THUMBNAILS
+    : DEFAULT_THUMBS;
+
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function titleOf(file){ return String(file).replace(/\.[^.]+$/, ''); }
+
+  const workGrid = document.getElementById('workGrid');
+  THUMBS.forEach((file, i) => {
+    const title = titleOf(file);
+    const d = document.createElement('div');
+    d.className = 'thumb reveal';
+    d.innerHTML =
+      '<div class="art" style="background:' + scenes[i % scenes.length] + '"></div>' +
+      '<img class="thumb-img" src="imgs/' + encodeURI(file) + '" alt="' + esc(title) + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+      '<div class="title">' + esc(title) + '</div>';
+    workGrid.appendChild(d);
+  });
+
+  // ---------- Hero slideshow (same images, 5s, pause on hover) ----------
+  const featured = document.getElementById('featured');
+  const slidesEl = document.getElementById('slides');
+  const slideCap = document.getElementById('slideCap');
+  const dotsEl = document.getElementById('slideDots');
+  const SLIDE_MS = 5000;
+  let slideIdx = 0, slideTimer = null;
+
+  function updateCaption(i){
+    slideCap.textContent = THUMBS[i] ? titleOf(THUMBS[i]) : 'Your next thumbnail here';
+  }
+  function goTo(i){
+    i = (i + THUMBS.length) % THUMBS.length;
+    slideIdx = i;
+    slidesEl.querySelectorAll('.slide').forEach((s, j) => s.classList.toggle('active', j === i));
+    dotsEl.querySelectorAll('button').forEach((d, j) => d.classList.toggle('active', j === i));
+    updateCaption(i);
+  }
+  function next(){ goTo(slideIdx + 1); }
+  function start(){ if (slideTimer) clearInterval(slideTimer); slideTimer = setInterval(next, SLIDE_MS); }
+  function stop(){ if (slideTimer) { clearInterval(slideTimer); slideTimer = null; } }
+
+  if (THUMBS.length > 0){
+    THUMBS.forEach((file, i) => {
+      const s = document.createElement('div');
+      s.className = 'slide' + (i === 0 ? ' active' : '');
+      const img = document.createElement('img');
+      img.src = 'imgs/' + encodeURI(file);
+      img.alt = titleOf(file);
+      img.onerror = function(){ this.style.display = 'none'; };
+      s.appendChild(img);
+      slidesEl.appendChild(s);
+      const dot = document.createElement('button');
+      dot.className = i === 0 ? 'active' : '';
+      dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+      dot.addEventListener('click', () => { goTo(i); start(); });
+      dotsEl.appendChild(dot);
+    });
+    updateCaption(0);
+    start();
+    featured.addEventListener('mouseenter', stop);
+    featured.addEventListener('mouseleave', start);
+  }
+
+  // ---------- Trusted by (loaded from Trusted.json, 5 visible + expandable) ----------
+  // Each creator entry: [ "Name", "profile image link", "subscribers" ]
+  const DEFAULT_CREATORS = [
+    ["SkyWarden", "", "1.2M subscribers"],
+    ["CraftPulse", "", "980K subscribers"],
+    ["BlockBoss", "", "640K subscribers"],
+    ["MineVault", "", "410K subscribers"],
+    ["PixelDrift", "", "280K subscribers"],
+    ["NetherNova", "", "150K subscribers"],
+    ["CubeCrew", "", "90K subscribers"],
+    ["EnderEdge", "", "54K subscribers"],
+    ["OreOverlord", "", "22K subscribers"],
+    ["CaveKing", "", "8K subscribers"]
+  ];
+  const avatarColors = ["#a9f33c","#ffd34d","#ff8f5a","#8fd0ff","#c79bff","#7ee8a2","#ffb3d9","#9ad7ff","#f5b942","#b3f0ff"];
+  const SHOW_COUNT = 5;
+  const CREATORS = (window.TRUSTED_CREATORS && Array.isArray(window.TRUSTED_CREATORS) && window.TRUSTED_CREATORS.length)
+    ? window.TRUSTED_CREATORS
+    : DEFAULT_CREATORS;
+
+  const trustedGrid = document.getElementById('trustedGrid');
+  const showBtn = document.getElementById('showCreators');
+  const creatorEls = [];
+
+  CREATORS.forEach((c, i) => {
+    const name = Array.isArray(c) ? (c[0] || '') : (c.name || '');
+    const img  = Array.isArray(c) ? (c[1] || '') : (c.img || '');
+    const subs = Array.isArray(c) ? (c[2] || '') : (c.subs || '');
+    const el = document.createElement('div');
+    el.className = 'creator';
+    const av = document.createElement('div');
+    av.className = 'avatar';
+    if (img) {
+      const im = document.createElement('img');
+      im.src = img;
+      im.alt = name;
+      im.loading = 'lazy';
+      av.appendChild(im);
+    } else {
+      av.style.background = avatarColors[i % avatarColors.length];
+      av.textContent = (name || '?').trim().charAt(0).toUpperCase() || '?';
+    }
+    const info = document.createElement('div');
+    const b = document.createElement('b');
+    b.textContent = name;
+    const span = document.createElement('span');
+    span.textContent = subs;
+    info.appendChild(b);
+    info.appendChild(span);
+    el.appendChild(av);
+    el.appendChild(info);
+    trustedGrid.appendChild(el);
+    creatorEls.push(el);
+    if (i >= SHOW_COUNT) el.classList.add('hidden');
+  });
+
+  if (CREATORS.length <= SHOW_COUNT) {
+    showBtn.style.display = 'none';
+  } else {
+    showBtn.textContent = 'Show all ' + CREATORS.length;
+    showBtn.addEventListener('click', () => {
+      const expanded = trustedGrid.classList.toggle('expanded');
+      creatorEls.forEach((el, i) => {
+        if (i >= SHOW_COUNT) el.classList.toggle('hidden', !expanded);
+      });
+      showBtn.textContent = expanded ? 'Show less' : 'Show all ' + CREATORS.length;
+    });
+  }
+
+  // ---------- Copy buttons ----------
+  document.querySelectorAll('.copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const text = btn.dataset.copy;
+      try{
+        await navigator.clipboard.writeText(text);
+        const old = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(()=>btn.textContent=old, 1600);
+      }catch(e){
+        prompt('Copy this:', text);
+      }
+    });
+  });
+
+  // ---------- Mobile menu ----------
+  const burger = document.getElementById('burger');
+  const mobileLinks = document.getElementById('mobileLinks');
+  burger.addEventListener('click', () => {
+    const open = mobileLinks.classList.toggle('open');
+    burger.classList.toggle('open', open);
+  });
+  mobileLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    mobileLinks.classList.remove('open');
+    burger.classList.remove('open');
+  }));
+
+  // ---------- Back to top ----------
+  document.getElementById('topBtn').addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+
+  // ---------- Custom cursor ----------
+  if (window.matchMedia('(pointer:fine)').matches) {
+    document.body.classList.add('custom-cursor');
+    const dot = document.querySelector('.cursor-dot');
+    const ring = document.querySelector('.cursor-ring');
+    const hoverSel = 'a, button, .thumb, .creator, .price-card, .step, .contact-card';
+    let mx = -100, my = -100, rx = -100, ry = -100, shown = false;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.transform = 'translate(' + mx + 'px,' + my + 'px) translate(-50%,-50%)';
+      if (!shown) { shown = true; dot.style.opacity = 1; ring.style.opacity = 1; }
+    });
+    (function loop(){
+      rx += (mx - rx) * 0.18;
+      ry += (my - ry) * 0.18;
+      ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) translate(-50%,-50%)';
+      requestAnimationFrame(loop);
+    })();
+    document.addEventListener('mouseover', e => { if (e.target.closest(hoverSel)) ring.classList.add('hover'); });
+    document.addEventListener('mouseout', e => {
+      if (e.target.closest(hoverSel) && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(hoverSel))) {
+        ring.classList.remove('hover');
+      }
+    });
+    document.addEventListener('mousedown', () => ring.classList.add('press'));
+    document.addEventListener('mouseup', () => ring.classList.remove('press'));
+    document.addEventListener('mouseleave', () => { shown = false; dot.style.opacity = 0; ring.style.opacity = 0; });
+  }
+
+  // ---------- Reveal on scroll ----------
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+window.TRUSTED_CREATORS = [
+  ["PlaceHolder", "", "1.2M subscribers"],
+  ["PlaceHolder", "", "980K subscribers"],
+  ["PlaceHolder", "", "640K subscribers"],
+  ["PlaceHolder", "", "410K subscribers"],
+  ["PlaceHolder", "", "280K subscribers"],
+  ["PlaceHolder", "", "150K subscribers"],
+  ["PlaceHolder", "", "90K subscribers"],
+  ["PlaceHolder", "", "54K subscribers"],
+  ["PlaceHolder", "", "22K subscribers"],
+  ["PlaceHolder", "", "8K subscribers"]
+];
