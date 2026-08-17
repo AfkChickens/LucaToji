@@ -109,7 +109,34 @@
   .slides{position:relative;aspect-ratio:16/9;background:linear-gradient(180deg,#1d3a12 0%,#2f5c1c 45%,#4b8a2a 100%);display:flex;align-items:center;justify-content:center}
   .slide{position:absolute;inset:0;opacity:0;transition:opacity .9s ease;z-index:1}
   .slide.active{opacity:1}
-  .slide img{width:100%;height:100%;object-fit:cover}
+  .slide img{width:100%;height:100%;object-fit:cover;-webkit-user-drag:none;user-select:none}
+  /* Ten lightweight deterrent layers sit above every displayed thumbnail. They do not block hover or controls. */
+  .protection-stack{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;user-select:none;-webkit-user-select:none}
+  .protection-layer{position:absolute;inset:0;display:block;pointer-events:none}
+  .protection-layer:nth-child(1){background:linear-gradient(117deg,transparent 0 49.7%,rgba(169,243,60,.035) 50%,transparent 50.3%)}
+  .protection-layer:nth-child(2){background:linear-gradient(23deg,transparent 0 49.8%,rgba(255,255,255,.025) 50%,transparent 50.2%)}
+  .protection-layer:nth-child(3){background:repeating-linear-gradient(91deg,transparent 0 37px,rgba(169,243,60,.018) 38px,transparent 39px)}
+  .protection-layer:nth-child(4){background:repeating-linear-gradient(173deg,transparent 0 43px,rgba(255,255,255,.014) 44px,transparent 45px)}
+  .protection-layer:nth-child(5){background:radial-gradient(circle at 22% 28%,rgba(169,243,60,.035),transparent 19%)}
+  .protection-layer:nth-child(6){background:radial-gradient(circle at 77% 68%,rgba(0,0,0,.04),transparent 24%)}
+  .protection-layer:nth-child(7){border:1px solid rgba(169,243,60,.035);transform:scale(.985)}
+  .protection-layer:nth-child(8){border:1px solid rgba(255,255,255,.025);transform:scale(.97)}
+  .protection-layer:nth-child(9){background:linear-gradient(transparent 48%,rgba(169,243,60,.02) 50%,transparent 52%);transform:rotate(-.35deg) scale(1.04)}
+  .protection-layer:nth-child(10){background:linear-gradient(90deg,rgba(0,0,0,.018),transparent 18% 82%,rgba(0,0,0,.018))}
+  .thumb,.slide{-webkit-touch-callout:none;user-select:none}
+  /* transparent watermark deterrent, 10 layers per image */
+  .watermark-stack{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;user-select:none;-webkit-user-select:none}
+  .watermark-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none}
+
+  /* devtools / content guard */
+  .guard-overlay{position:fixed;inset:0;z-index:100000;background:rgba(5,8,4,.94);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:26px}
+  .guard-overlay.show{display:flex}
+  .guard-card{max-width:520px;background:var(--card);border:1px solid rgba(255,157,92,.55);border-radius:var(--radius);padding:42px 38px;text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.65)}
+  .guard-card .warn-icon{width:56px;height:56px;border-radius:50%;background:rgba(255,140,60,.14);border:1px solid rgba(255,157,92,.5);color:#ff9d5c;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+  .guard-card .warn-icon svg{width:28px;height:28px}
+  .guard-card h2{font-size:1.5rem;margin-bottom:10px}
+  .guard-card p{color:var(--muted);font-size:.98rem;margin-bottom:24px}
+  body.guarded{overflow:hidden}
   .featured .cap{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:26px 18px 16px;background:linear-gradient(transparent,rgba(0,0,0,.85));font-family:'Space Grotesk';font-weight:600;font-size:1.05rem;text-shadow:0 1px 6px rgba(0,0,0,.6)}
   .dots{position:absolute;right:16px;bottom:16px;z-index:3;display:flex;gap:6px;align-items:center}
   .dots button{width:7px;height:7px;border-radius:99px;border:none;background:rgba(255,255,255,.45);cursor:pointer;padding:0;transition:all .3s}
@@ -141,10 +168,10 @@
   }
   .thumb:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,.5)}
   .thumb .art{position:absolute;inset:0;transition:transform .4s}
-  .thumb .thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}
+  .thumb .thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s;-webkit-user-drag:none;user-select:none}
   .thumb:hover .art,.thumb:hover .thumb-img{transform:scale(1.07)}
   .thumb .title{
-    position:absolute;left:0;right:0;bottom:0;padding:40px 20px 18px;
+    position:absolute;left:0;right:0;bottom:0;z-index:3;padding:40px 20px 18px;
     background:linear-gradient(transparent,rgba(0,0,0,.9));
     font-family:'Space Grotesk';font-weight:600;font-size:1.18rem;line-height:1.3;
     opacity:0;transform:translateY(14px);
@@ -457,8 +484,17 @@
   </div>
 </footer>
 
+<div class="guard-overlay" id="guardOverlay" aria-hidden="true">
+  <div class="guard-card">
+    <div class="warn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+    <h2>Content protected</h2>
+    <p>Developer tools were detected. The artwork on this page is protected. Please close the developer tools / inspector to continue browsing.</p>
+    <button class="btn" id="guardContinue">I closed it — continue</button>
+  </div>
+</div>
+
 <script src="Trusted.json"></script>
-<script src="thumbs.json"></script>
+<script>document.write('<script src="thumbs.json?v=' + Date.now() + '"><\/script>');</script>
 <script>
   // ---------- Thumbnails (from imgs/ via thumbs.json) ----------
   const DEFAULT_THUMBS = [
@@ -491,6 +527,24 @@
 
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function titleOf(file){ return String(file).replace(/\.[^.]+$/, ''); }
+  function imagePath(file){
+    return 'imgs/' + encodeURIComponent(String(file)).replace(/%2F/g, '/');
+  }
+
+  function protectionLayers(){
+    return Array.from({length:10}, (_, i) => '<span class="protection-layer layer-' + (i + 1) + '"></span>').join('');
+  }
+  function watermarkLayers(){
+    const src = 'https://i.imgur.com/imSq8o6.png';
+    let out = '';
+    for (let i = 0; i < 10; i++){
+      const rotate = ((i - 4.5) * 1.4).toFixed(1);
+      const scale = (1 + (i % 3) * 0.02).toFixed(3);
+      const opacity = (0.08 + (i % 4) * 0.03).toFixed(2);
+      out += '<img class="watermark-layer" src="' + src + '" alt="" aria-hidden="true" draggable="false" decoding="async" loading="lazy" style="opacity:' + opacity + ';transform:rotate(' + rotate + 'deg) scale(' + scale + ')" onerror="this.remove()">';
+    }
+    return out;
+  }
 
   const workGrid = document.getElementById('workGrid');
   THUMBS.forEach((file, i) => {
@@ -499,7 +553,9 @@
     d.className = 'thumb reveal';
     d.innerHTML =
       '<div class="art" style="background:' + scenes[i % scenes.length] + '"></div>' +
-      '<img class="thumb-img" src="imgs/' + encodeURI(file) + '" alt="' + esc(title) + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+      '<img class="thumb-img" src="' + imagePath(file) + '" alt="' + esc(title) + '" loading="lazy" draggable="false" data-protected-image onerror="this.style.display=\'none\'">' +
+      '<div class="protection-stack" aria-hidden="true">' + protectionLayers() + '</div>' +
+      '<div class="watermark-stack" aria-hidden="true">' + watermarkLayers() + '</div>' +
       '<div class="title">' + esc(title) + '</div>';
     workGrid.appendChild(d);
   });
@@ -531,10 +587,22 @@
       const s = document.createElement('div');
       s.className = 'slide' + (i === 0 ? ' active' : '');
       const img = document.createElement('img');
-      img.src = 'imgs/' + encodeURI(file);
+      img.src = imagePath(file);
       img.alt = titleOf(file);
+      img.draggable = false;
+      img.setAttribute('data-protected-image', '');
       img.onerror = function(){ this.style.display = 'none'; };
       s.appendChild(img);
+      const layers = document.createElement('div');
+      layers.className = 'protection-stack';
+      layers.setAttribute('aria-hidden', 'true');
+      layers.innerHTML = protectionLayers();
+      s.appendChild(layers);
+      const wm = document.createElement('div');
+      wm.className = 'watermark-stack';
+      wm.setAttribute('aria-hidden', 'true');
+      wm.innerHTML = watermarkLayers();
+      s.appendChild(wm);
       slidesEl.appendChild(s);
       const dot = document.createElement('button');
       dot.className = i === 0 ? 'active' : '';
@@ -616,6 +684,81 @@
       showBtn.textContent = expanded ? 'Show less' : 'Show all ' + CREATORS.length;
     });
   }
+
+  // ---------- Thumbnail protection ----------
+  // These measures deter casual saving/copying; no browser page can make public images impossible to capture.
+  const protectedAreas = '.thumb, .slide';
+  function selectionInsideProtectedArea(){
+    const selection = window.getSelection();
+    const node = selection && selection.anchorNode;
+    const element = node && (node.nodeType === 1 ? node : node.parentElement);
+    return Boolean(element && element.closest && element.closest(protectedAreas));
+  }
+  document.addEventListener('contextmenu', e => {
+    if (e.target.closest && e.target.closest(protectedAreas)) e.preventDefault();
+  });
+  document.addEventListener('dragstart', e => {
+    if (e.target.closest && e.target.closest(protectedAreas + ', img[data-protected-image]')) e.preventDefault();
+  });
+  document.addEventListener('selectstart', e => {
+    if (e.target.closest && e.target.closest(protectedAreas)) e.preventDefault();
+  });
+  document.addEventListener('copy', e => {
+    if (selectionInsideProtectedArea()) e.preventDefault();
+  });
+  document.addEventListener('keydown', e => {
+    const key = e.key.toLowerCase();
+    const blockedShortcut = (e.ctrlKey || e.metaKey) && ['s','u','p'].includes(key);
+    const blockedDevtools = e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','j','c'].includes(key));
+    if (blockedShortcut || blockedDevtools) e.preventDefault();
+    if ((e.ctrlKey || e.metaKey) && key === 'c' && selectionInsideProtectedArea()) e.preventDefault();
+  });
+  document.addEventListener('cut', e => {
+    if (selectionInsideProtectedArea()) e.preventDefault();
+  });
+  document.addEventListener('paste', e => {
+    if (selectionInsideProtectedArea()) e.preventDefault();
+  });
+
+  // ---------- Developer tools guard (warning + lock) ----------
+  const guardOverlay = document.getElementById('guardOverlay');
+  const guardContinue = document.getElementById('guardContinue');
+  let guarded = false;
+  function lockPage(){
+    if (guarded) return;
+    guarded = true;
+    document.body.classList.add('guarded');
+    guardOverlay.classList.add('show');
+    guardOverlay.setAttribute('aria-hidden', 'false');
+  }
+  function unlockPage(){
+    guarded = false;
+    document.body.classList.remove('guarded');
+    guardOverlay.classList.remove('show');
+    guardOverlay.setAttribute('aria-hidden', 'true');
+  }
+  function devtoolsDocked(){
+    return (window.outerWidth - window.innerWidth > 160) || (window.outerHeight - window.innerHeight > 160);
+  }
+  function devtoolsTiming(){
+    const start = performance.now();
+    debugger;
+    return performance.now() - start > 120;
+  }
+  function isDevToolsOpen(){ return devtoolsDocked() || devtoolsTiming(); }
+  guardContinue.addEventListener('click', () => {
+    if (!isDevToolsOpen()) unlockPage();
+  });
+  setInterval(() => { if (devtoolsDocked()) lockPage(); }, 600);
+  setInterval(() => { if (devtoolsTiming()) lockPage(); }, 1500);
+
+  // console watcher: opening the console to inspect elements trips the guard
+  const guardProbe = document.createElement('div');
+  Object.defineProperty(guardProbe, 'id', {
+    get: function(){ lockPage(); return 'guard-probe'; }
+  });
+  setInterval(() => { console.log('%c', guardProbe); }, 1500);
+
 
   // ---------- Copy buttons ----------
   document.querySelectorAll('.copy').forEach(btn => {
